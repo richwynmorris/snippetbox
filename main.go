@@ -12,6 +12,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello form Snippetbox"))
 }
 
+func showSnippet(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Display a specific snippet..."))
+}
+
+func createSnippet(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Create a new snippet..."))
+}
+
 func main() {
 	// Use the http.NewServeMux() function to initialize a new servemux/router,
 	// then register the home function as the handler for the "/" URL pattern
@@ -19,6 +27,9 @@ func main() {
 	// Default path treats patter "/" as a catch all. All requests to the server will
 	//handled by the home function
 	mux.HandleFunc("/", home)
+
+	mux.HandleFunc("/snippet", showSnippet)
+	mux.HandleFunc("/snippet/create", createSnippet)
 
 	log.Println("Starting server on port 4000")
 
