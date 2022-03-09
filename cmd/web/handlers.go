@@ -3,14 +3,13 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
 // Define a home handler function which writes a byte slice containing
 // "Hello from Snippetbox" as the body response
-func home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Check is the url path matches '/' exactly. If it doesnt,
 	// use the http.NotFound() function to return a 404 responose to the
 	// client. Return from the handler so that the function exits
@@ -29,7 +28,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// ParseFiles reads the template file into a template set
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		log.Println(err.Error())
+		app.errorLog.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
@@ -39,12 +38,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// that is relevant to the
 	err = ts.Execute(w, nil)
 	if err != nil {
-		log.Println(err.Error())
+		app.errorLog.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
 }
 
-func showSnippet(w http.ResponseWriter, r *http.Request) {
+func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	param := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(param)
 
@@ -56,7 +55,7 @@ func showSnippet(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
 }
 
-func createSnippet(w http.ResponseWriter, r *http.Request) {
+func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	const statusCode int = 405
 	// Use r.Method to check whether the request is using a POST or not.
 	if r.Method != "POST" {
