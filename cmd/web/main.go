@@ -16,6 +16,11 @@ func main() {
 	mux.HandleFunc("/snippet", showSnippet)
 	mux.HandleFunc("/snippet/create", createSnippet)
 
+	// Create a file server which serves files out of the static directory
+	fileServer := http.FileServer(http.Dir("./ui/static"))
+
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+
 	log.Println("Starting server on port 4000")
 
 	// ListenAndServe function starts a new web server. It takes two paramters, the TCP
