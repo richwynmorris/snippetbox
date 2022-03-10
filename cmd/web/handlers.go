@@ -14,7 +14,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// use the http.NotFound() function to return a 404 responose to the
 	// client. Return from the handler so that the function exits
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		app.notFound(w)
 		return
 	}
 
@@ -28,8 +28,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// ParseFiles reads the template file into a template set
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		app.errorLog.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		app.serverError(w, err)
 		return
 	}
 
@@ -38,8 +37,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// that is relevant to the
 	err = ts.Execute(w, nil)
 	if err != nil {
-		app.errorLog.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		app.serverError(w, err)
 	}
 }
 
@@ -48,7 +46,7 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(param)
 
 	if err != nil || id < 1 {
-		http.NotFound(w, r)
+		app.notFound(w)
 		return
 	}
 
@@ -66,7 +64,7 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Allow", "POST")
 		// Use http.Error() function to send a 405 status code and "Method Not Allowed"
 		// string as the response body.
-		http.Error(w, "Method Not Allowed", statusCode)
+		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
 	w.Write([]byte("Create a new snippet..."))
