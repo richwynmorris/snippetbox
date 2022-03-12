@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"time"
 )
 
 // The serverError helps write an error message and stack trace to the errorLog
@@ -24,4 +26,33 @@ func (app *application) clientError(w http.ResponseWriter, status int) {
 // Not found helper - wraps around clientError but passes down 404 status to be returned
 func (app *application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
+}
+
+// Render the template for the appropriate page by retriecing it from the cache
+func (app *application) render(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
+	// retrieve template from cache - if no template, serverError is called
+	templateSet, ok := app.templateCache[name]
+	if !ok {
+		app.serverError(w, fmt.Errorf("the template %s does not exists", name))
+		return
+	}
+
+	buf := new(bytes.Buffer)
+
+	// Execute the template set, passing in any dynamic data
+	err := templateSet.Execute(buf, app.addDefaultData(td, r))
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	buf.WriteTo(w)
+}
+
+func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
+	if td == nil {
+		td = &templateData{}
+	}
+	td.CurrentYear = time.Now().Year()
+	return td
 }
