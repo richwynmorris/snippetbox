@@ -15,10 +15,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Check is the url path matches '/' exactly. If it doesnt,
 	// use the http.NotFound() function to return a 404 responose to the
 	// client. Return from the handler so that the function exits
-	if r.URL.Path != "/" {
-		app.notFound(w)
-		return
-	}
+	// if r.URL.Path != "/" {
+	// 	app.notFound(w)
+	// 	return
+	// } => No longer needed as Pat matches '/' exactly
 
 	snippets, err := app.snippets.Latest()
 	if err != nil {
@@ -30,7 +30,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
-	param := r.URL.Query().Get("id")
+	param := r.URL.Query().Get(":id")
 	id, err := strconv.Atoi(param)
 
 	if err != nil || id < 1 {
@@ -51,19 +51,11 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "show.page.tmpl", &templateData{Snippet: snippet})
 }
 
+func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Create a new snippet..."))
+}
+
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	// Use r.Method to check whether the request is using a POST or not.
-	if r.Method != "POST" {
-		// If the method is not POST, send a response with the status 405
-		// (METHOD not accepted) in the response body. Added an 'Allow: POST' header to the
-		// response. The first param is the header name and the second is the header value
-		// This must be called before either WriteHeader or Write methods
-		w.Header().Set("Allow", "POST")
-		// Use http.Error() function to send a 405 status code and "Method Not Allowed"
-		// string as the response body.
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
 
 	// Dummy data:
 	title := "0 snail"
@@ -77,5 +69,5 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
