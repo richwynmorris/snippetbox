@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -13,37 +14,45 @@ import (
 )
 
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
-	snippets *models.SnippetModel
+	errorLog      *log.Logger
+	infoLog       *log.Logger
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
-	// Initialize cli arguments for flags
+	// Initialize cli arguments for flags.
 	addr := flag.String("addr", ":4000", "HTTP Network Address")
 	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
-	// Initialize loggers
+	// Initialize loggers.
 	infoLog := log.New(os.Stdout, "INFO:\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR:\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	// Open database connection
+	// Open database connection.
 	db, err := openDB(*dsn)
 	if err != nil {
 		errorLog.Fatal(err)
 	}
-	// Defer closing of database connection for graceful shutdown
+	// Defer closing of database connection for graceful shutdown.
 	defer db.Close()
 
-	// Initialize snippetModel with open database connection
+	// Initialize snippetModel with open database connection.
 	snippetModel := &models.SnippetModel{DB: db}
+
+	// Initialize a templateCache to be used for html rendering.
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
 
 	// Inject looger and database dependencies into application struct
 	app := &application{
-		errorLog: errorLog,
-		infoLog:  infoLog,
-		snippets: snippetModel,
+		errorLog:      errorLog,
+		infoLog:       infoLog,
+		snippets:      snippetModel,
+		templateCache: templateCache,
 	}
 
 	// Initialize server with handler to access the routes available on the app
