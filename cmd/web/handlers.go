@@ -50,19 +50,35 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Display the form for creating a new snippet..."))
+	data := app.newTemplateData(r)
+	app.render(w, http.StatusOK, "create.tmpl.html", data)
 }
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	title := "O snail"
-	content := "O nsail\nClimb Mount Fiji,\nBut slowly, slowly!\n\n- Kobayashi Issa"
-	expires := 7
+	// Parses the form sent in the request into a map which can be used to select the fields on the form.
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
+	// Use the getter method to retrieve the values for each key on the form map.
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+
+	// Parse the expires value into an integer as we're expecting the value to be a number.
+	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+	}
+
+	// Insert the form data into the database.
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
+	// Redirect the page to the newly added snippet.
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
