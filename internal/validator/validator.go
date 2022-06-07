@@ -3,8 +3,6 @@ package validator
 import (
 	"strings"
 	"unicode/utf8"
-),
-	"unicode/utf8"
 )
 
 type Validator struct {
@@ -15,7 +13,7 @@ func (v *Validator) Valid() bool {
 	return len(v.FieldErrors) == 0
 }
 
-func (v *Validator) AddFieldError (key, message string) {
+func (v *Validator) AddFieldError(key, message string) {
 	if v.FieldErrors == nil {
 		v.FieldErrors = make(map[string]string)
 	}
