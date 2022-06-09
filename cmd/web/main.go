@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 
 	"richwynmorris.co.uk/internal/models"
@@ -18,6 +19,7 @@ type application struct {
 	infoLog       *log.Logger
 	snippets      *models.SnippetModel
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -47,12 +49,16 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	// Initialize decoder instance...
+	formDecoder := form.NewDecoder()
+
 	// Inject looger and database dependencies into application struct
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
 		snippets:      snippetModel,
 		templateCache: templateCache,
+		formDecoder:   formDecoder,
 	}
 
 	// Initialize server with handler to access the routes available on the app
