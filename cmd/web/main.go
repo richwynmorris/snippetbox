@@ -7,7 +7,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 
@@ -15,11 +18,12 @@ import (
 )
 
 type application struct {
-	errorLog      *log.Logger
-	infoLog       *log.Logger
-	snippets      *models.SnippetModel
-	templateCache map[string]*template.Template
-	formDecoder   *form.Decoder
+	errorLog       *log.Logger
+	infoLog        *log.Logger
+	snippets       *models.SnippetModel
+	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -52,13 +56,21 @@ func main() {
 	// Initialize decoder instance...
 	formDecoder := form.NewDecoder()
 
-	// Inject looger and database dependencies into application struct
+	// Initialize session manager.
+	sessionManager := scs.New()
+	// Configure sessions manager to use MySQL db.
+	sessionManager.Store = mysqlstore.New(db)
+	// Set session's expire date.
+	sessionManager.Lifetime = 12 * time.Hour
+
+	// Application struct containing the app's dependencies.
 	app := &application{
-		errorLog:      errorLog,
-		infoLog:       infoLog,
-		snippets:      snippetModel,
-		templateCache: templateCache,
-		formDecoder:   formDecoder,
+		errorLog:       errorLog,
+		infoLog:        infoLog,
+		snippets:       snippetModel,
+		templateCache:  templateCache,
+		formDecoder:    formDecoder,
+		sessionManager: sessionManager,
 	}
 
 	// Initialize server with handler to access the routes available on the app
