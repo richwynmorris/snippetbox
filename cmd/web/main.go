@@ -20,11 +20,12 @@ import (
 
 type application struct {
 	errorLog       *log.Logger
+	formDecoder    *form.Decoder
 	infoLog        *log.Logger
+	sessionManager *scs.SessionManager
 	snippets       *models.SnippetModel
 	templateCache  map[string]*template.Template
-	formDecoder    *form.Decoder
-	sessionManager *scs.SessionManager
+	users          *models.UserModel
 }
 
 func main() {
@@ -47,6 +48,8 @@ func main() {
 
 	// Initialize snippetModel with open database connection.
 	snippetModel := &models.SnippetModel{DB: db}
+	// Initialize UserModel with open data database connection
+	userModel := &models.UserModel{DB: db}
 
 	// Initialize a templateCache to be used for html rendering.
 	templateCache, err := newTemplateCache()
@@ -69,11 +72,12 @@ func main() {
 	// Application struct containing the app's dependencies.
 	app := &application{
 		errorLog:       errorLog,
+		formDecoder:    formDecoder,
 		infoLog:        infoLog,
+		sessionManager: sessionManager,
 		snippets:       snippetModel,
 		templateCache:  templateCache,
-		formDecoder:    formDecoder,
-		sessionManager: sessionManager,
+		users:          userModel,
 	}
 
 	tlsConfig := &tls.Config{
