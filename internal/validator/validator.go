@@ -71,6 +71,6 @@ func Matches(value string, rx *regexp.Regexp) bool {
 }
 
 // addNonFieldError appends a new message to the NonFieldError field on the Validator struct.
-func (v *Validator) addNonFieldError(message string) {
+func (v *Validator) AddNonFieldError(message string) {
 	v.NonFieldErrors = append(v.NonFieldErrors, message)
 }
