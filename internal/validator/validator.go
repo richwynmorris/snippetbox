@@ -50,10 +50,10 @@ func MaxChars(value string, n int) bool {
 	return utf8.RuneCountInString(value) <= n
 }
 
-// PermittedInt checks if the value argument is containted within the permitted values collection.
-func PermittedInt(val int, permittedValues ...int) bool {
+// PermittedValue checks if the value argument is containted within the permitted values collection.
+func PermittedValue[T comparable](value T, permittedValues ...T) bool {
 	for i := range permittedValues {
-		if val == permittedValues[i] {
+		if value == permittedValues[i] {
 			return true
 		}
 	}
