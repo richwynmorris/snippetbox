@@ -21,6 +21,8 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.FS(ui.Files))
 	router.Handler(http.MethodGet, "/static/*filepath", fileServer)
 
+	router.HandlerFunc(http.MethodGet, "/ping", ping)
+
 	// Initialize session manager middleware to be executed on each of the app routes where session data is required.
 	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
 
