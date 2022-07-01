@@ -2,9 +2,9 @@ package mocks
 
 import "richwynmorris.co.uk/internal/models"
 
-type MockUserModel struct{}
+type UserModel struct{}
 
-func (m *MockUserModel) Insert(_, email, _ string) error {
+func (m *UserModel) Insert(_, email, _ string) error {
 	switch email {
 	case "dupe@example.com":
 		return models.ErrDuplicateEmail
@@ -13,7 +13,7 @@ func (m *MockUserModel) Insert(_, email, _ string) error {
 	}
 }
 
-func (m *MockUserModel) Authenticate(email, password string) (int, error) {
+func (m *UserModel) Authenticate(email, password string) (int, error) {
 	if email == "alice@example.com" && password == "pa$$word" {
 		return 1, nil
 	}
@@ -21,7 +21,7 @@ func (m *MockUserModel) Authenticate(email, password string) (int, error) {
 	return 0, models.ErrInvalidCredentials
 }
 
-func (m *MockUserModel) Exists(id int) (bool, error) {
+func (m *UserModel) Exists(id int) (bool, error) {
 	switch id {
 	case 1:
 		return true, nil
