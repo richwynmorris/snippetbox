@@ -40,7 +40,7 @@ func TestSnippetView(t *testing.T) {
 			name:     "ValidID",
 			urlPath:  "/snippet/view/1",
 			wantCode: http.StatusOK,
-			wantBody: "An old silent ponds..",
+			wantBody: "An old silent pond",
 		},
 		{
 			name:     "Non-existent ID",
